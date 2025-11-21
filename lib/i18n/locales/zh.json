@@ -1,0 +1,96 @@
+{
+  "common": {
+    "dashboard": "仪表盘",
+    "tasks": "任务",
+    "settings": "设置",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "search": "搜索",
+    "filter": "筛选",
+    "refresh": "刷新",
+    "back": "返回",
+    "submit": "提交",
+    "close": "关闭"
+  },
+  "nav": {
+    "dashboard": "仪表盘",
+    "taskManagement": "任务管理",
+    "taskList": "任务列表",
+    "createTask": "创建任务",
+    "runningTasks": "运行中任务",
+    "settings": "设置"
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "runningTasks": "运行中任务",
+    "totalTasks": "总任务数",
+    "completedTasks": "已完成任务",
+    "failedTasks": "失败任务",
+    "recentTasks": "最近任务"
+  },
+  "tasks": {
+    "title": "任务管理",
+    "list": "任务列表",
+    "create": "创建任务",
+    "detail": "任务详情",
+    "running": "运行中任务",
+    "id": "任务ID",
+    "name": "任务名称",
+    "status": "状态",
+    "progress": "进度",
+    "createdAt": "创建时间",
+    "updatedAt": "更新时间",
+    "actions": "操作",
+    "view": "查看",
+    "copy": "复制",
+    "cancel": "取消任务",
+    "delete": "删除任务",
+    "noTasks": "未找到任务",
+    "statusPending": "待处理",
+    "statusInProgress": "进行中",
+    "statusCompleted": "已完成",
+    "statusFailed": "失败",
+    "statusCancelled": "已取消"
+  },
+  "taskForm": {
+    "title": "创建新任务",
+    "name": "任务名称",
+    "namePlaceholder": "请输入任务名称",
+    "executor": "执行器",
+    "executorPlaceholder": "选择执行器",
+    "inputs": "输入参数",
+    "priority": "优先级",
+    "priorityUrgent": "紧急",
+    "priorityHigh": "高",
+    "priorityNormal": "普通",
+    "priorityLow": "低",
+    "parentTask": "父任务（可选）",
+    "dependencies": "依赖关系",
+    "addDependency": "添加依赖",
+    "create": "创建任务",
+    "createAndExecute": "创建并执行"
+  },
+  "settings": {
+    "title": "设置",
+    "api": "API配置",
+    "apiUrl": "API基础URL",
+    "apiUrlPlaceholder": "http://localhost:8000",
+    "authentication": "认证",
+    "authToken": "认证令牌",
+    "saveSettings": "保存设置"
+  },
+  "errors": {
+    "apiError": "API错误",
+    "networkError": "网络错误",
+    "unknownError": "未知错误",
+    "taskNotFound": "未找到任务",
+    "failedToLoad": "加载数据失败"
+  }
+}
+

@@ -1,0 +1,96 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "settings": "Settings",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "back": "Back",
+    "submit": "Submit",
+    "close": "Close"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "taskManagement": "Task Management",
+    "taskList": "Task List",
+    "createTask": "Create Task",
+    "runningTasks": "Running Tasks",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "runningTasks": "Running Tasks",
+    "totalTasks": "Total Tasks",
+    "completedTasks": "Completed Tasks",
+    "failedTasks": "Failed Tasks",
+    "recentTasks": "Recent Tasks"
+  },
+  "tasks": {
+    "title": "Task Management",
+    "list": "Task List",
+    "create": "Create Task",
+    "detail": "Task Detail",
+    "running": "Running Tasks",
+    "id": "Task ID",
+    "name": "Task Name",
+    "status": "Status",
+    "progress": "Progress",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "actions": "Actions",
+    "view": "View",
+    "copy": "Copy",
+    "cancel": "Cancel Task",
+    "delete": "Delete Task",
+    "noTasks": "No tasks found",
+    "statusPending": "Pending",
+    "statusInProgress": "In Progress",
+    "statusCompleted": "Completed",
+    "statusFailed": "Failed",
+    "statusCancelled": "Cancelled"
+  },
+  "taskForm": {
+    "title": "Create New Task",
+    "name": "Task Name",
+    "namePlaceholder": "Enter task name",
+    "executor": "Executor",
+    "executorPlaceholder": "Select executor",
+    "inputs": "Input Parameters",
+    "priority": "Priority",
+    "priorityUrgent": "Urgent",
+    "priorityHigh": "High",
+    "priorityNormal": "Normal",
+    "priorityLow": "Low",
+    "parentTask": "Parent Task (Optional)",
+    "dependencies": "Dependencies",
+    "addDependency": "Add Dependency",
+    "create": "Create Task",
+    "createAndExecute": "Create and Execute"
+  },
+  "settings": {
+    "title": "Settings",
+    "api": "API Configuration",
+    "apiUrl": "API Base URL",
+    "apiUrlPlaceholder": "http://localhost:8000",
+    "authentication": "Authentication",
+    "authToken": "Authentication Token",
+    "saveSettings": "Save Settings"
+  },
+  "errors": {
+    "apiError": "API Error",
+    "networkError": "Network Error",
+    "unknownError": "Unknown Error",
+    "taskNotFound": "Task not found",
+    "failedToLoad": "Failed to load data"
+  }
+}
+
