@@ -6,12 +6,12 @@
  * Display list of all tasks with filtering and search
  */
 
-import { Container, Title, Button, Group, TextInput, Table, Badge, ActionIcon, Tooltip, Text } from '@mantine/core';
+import { Container, Title, Button, Group, TextInput, Table, Badge, ActionIcon, Tooltip, Text, Select, Stack, Alert } from '@mantine/core';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/aipartnerupflow';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import { IconPlus, IconSearch, IconEye, IconCopy, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconEye, IconCopy, IconTrash, IconDatabase, IconInfoCircle, IconPlayerPlay } from '@tabler/icons-react';
 import { useState } from 'react';
 import { notifications } from '@mantine/notifications';
 
@@ -21,11 +21,40 @@ export default function TaskListPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Note: This is a placeholder - you may need to implement a list endpoint
-  // For now, we'll use running tasks as an example
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+
+  // List all tasks (not just running ones)
   const { data: tasks, isLoading } = useQuery({
-    queryKey: ['tasks', searchQuery],
-    queryFn: () => apiClient.getRunningTasks(),
+    queryKey: ['tasks', searchQuery, statusFilter],
+    queryFn: () => apiClient.listTasks({ status: statusFilter }),
+  });
+
+  // Check examples status
+  const { data: examplesStatus } = useQuery({
+    queryKey: ['examples-status'],
+    queryFn: () => apiClient.getExamplesStatus(),
+    retry: false,
+  });
+
+  // Initialize examples mutation
+  const initExamplesMutation = useMutation({
+    mutationFn: (force: boolean) => apiClient.initExamples(force),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['examples-status'] });
+      notifications.show({
+        title: 'Success',
+        message: data.message,
+        color: 'green',
+      });
+    },
+    onError: (error: any) => {
+      notifications.show({
+        title: 'Error',
+        message: error.message || 'Failed to initialize examples',
+        color: 'red',
+      });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -61,6 +90,26 @@ export default function TaskListPage() {
       notifications.show({
         title: t('common.error'),
         message: error.message || t('errors.apiError'),
+        color: 'red',
+      });
+    },
+  });
+
+  const executeMutation = useMutation({
+    mutationFn: (taskId: string) => apiClient.executeTask(taskId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['running-tasks'] });
+      notifications.show({
+        title: t('common.success'),
+        message: data.message || 'Task execution started',
+        color: 'green',
+      });
+    },
+    onError: (error: any) => {
+      notifications.show({
+        title: t('common.error'),
+        message: error.message || 'Failed to execute task',
         color: 'red',
       });
     },
@@ -106,12 +155,65 @@ export default function TaskListPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ flex: 1 }}
         />
+        <Select
+          placeholder={t('tasks.filterByStatus') || 'Filter by status'}
+          value={statusFilter || null}
+          onChange={(value) => setStatusFilter(value || undefined)}
+          data={[
+            { value: '', label: t('tasks.allStatuses') || 'All Statuses' },
+            { value: 'pending', label: 'Pending' },
+            { value: 'in_progress', label: 'In Progress' },
+            { value: 'completed', label: 'Completed' },
+            { value: 'failed', label: 'Failed' },
+            { value: 'cancelled', label: 'Cancelled' },
+          ]}
+          clearable
+          style={{ width: 200 }}
+        />
       </Group>
 
       {isLoading ? (
         <Text c="dimmed">{t('common.loading')}</Text>
       ) : filteredTasks.length === 0 ? (
-        <Text c="dimmed">{t('tasks.noTasks')}</Text>
+        <Stack gap="md" align="center" py="xl">
+          <Text c="dimmed" size="lg">{t('tasks.noTasks')}</Text>
+          {examplesStatus?.available && (
+            <Stack gap="sm" align="center" style={{ maxWidth: 500 }}>
+              <Alert icon={<IconInfoCircle size={16} />} color="blue" title="Initialize Example Data">
+                {examplesStatus.initialized
+                  ? 'Example tasks are already initialized. You can force re-initialization if needed.'
+                  : 'Initialize example tasks to get started. This will create sample tasks demonstrating various features.'}
+              </Alert>
+              <Group>
+                <Button
+                  leftSection={<IconDatabase size={16} />}
+                  onClick={() => initExamplesMutation.mutate(false)}
+                  loading={initExamplesMutation.isPending}
+                  variant={examplesStatus.initialized ? 'outline' : 'filled'}
+                >
+                  {examplesStatus.initialized ? 'Re-initialize Examples' : 'Initialize Examples'}
+                </Button>
+                {examplesStatus.initialized && (
+                  <Button
+                    variant="outline"
+                    color="red"
+                    onClick={() => initExamplesMutation.mutate(true)}
+                    loading={initExamplesMutation.isPending}
+                  >
+                    Force Re-initialize
+                  </Button>
+                )}
+              </Group>
+            </Stack>
+          )}
+          {!examplesStatus?.available && (
+            <Alert icon={<IconInfoCircle size={16} />} color="yellow" title="Examples Module Not Available">
+              Install examples module to enable example data initialization:
+              <br />
+              <code>pip install aipartnerupflow[examples]</code>
+            </Alert>
+          )}
+        </Stack>
       ) : (
         <Table striped highlightOnHover>
           <Table.Thead>
@@ -150,6 +252,18 @@ export default function TaskListPage() {
                         <IconEye size={16} />
                       </ActionIcon>
                     </Tooltip>
+                    {(task.status === 'pending' || task.status === 'failed') && (
+                      <Tooltip label="Execute Task">
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          onClick={() => executeMutation.mutate(task.id)}
+                          loading={executeMutation.isPending}
+                        >
+                          <IconPlayerPlay size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                    )}
                     <Tooltip label={t('tasks.copy')}>
                       <ActionIcon
                         variant="subtle"

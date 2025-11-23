@@ -90,12 +90,25 @@ export class AIPartnerUpFlowClient {
       },
     });
 
-    // Add request interceptor for authentication if needed
+    // Add request interceptor for authentication and LLM key
     this.client.interceptors.request.use((config) => {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      
+      // Add LLM API key from localStorage if available (request header method)
+      // Format: provider:key (e.g., "openai:sk-xxx...") or just key (backward compatible)
+      // Support provider-specific keys: llm_api_key_<provider> or default llm_api_key
+      // Note: If X-LLM-API-KEY is already set (e.g., by executeTask), use it directly
+      if (typeof window !== 'undefined' && !config.headers['X-LLM-API-KEY']) {
+        // Get default key from localStorage
+        const llmKey = localStorage.getItem('llm_api_key');
+        if (llmKey) {
+          config.headers['X-LLM-API-KEY'] = llmKey;
+        }
+      }
+      
       return config;
     });
 
@@ -147,6 +160,9 @@ export class AIPartnerUpFlowClient {
    * Get task details by ID
    */
   async getTask(taskId: string): Promise<Task> {
+    if (!taskId) {
+      throw new Error('Task ID is required');
+    }
     return this.rpcRequest<Task>('/tasks', 'tasks.get', { task_id: taskId });
   }
 
@@ -200,8 +216,133 @@ export class AIPartnerUpFlowClient {
   /**
    * Create a copy of a task tree for re-execution
    */
-  async copyTask(taskId: string): Promise<TaskTree> {
-    return this.rpcRequest<TaskTree>('/tasks', 'tasks.copy', { task_id: taskId });
+  async copyTask(taskId: string): Promise<Task> {
+    return this.rpcRequest<Task>('/tasks', 'tasks.copy', { task_id: taskId });
+  }
+
+  /**
+   * Detect LLM provider from task configuration
+   */
+  private detectProviderFromTask(task: Task): string | undefined {
+    // Check params.works.agents for LLM model
+    const works = task.params?.works;
+    if (works?.agents) {
+      for (const agentConfig of Object.values(works.agents)) {
+        const agent = agentConfig as any;
+        const llm = agent?.llm;
+        if (typeof llm === 'string') {
+          return this.detectProviderFromModel(llm);
+        }
+      }
+    }
+    
+    // Check crew-level LLM
+    if (works?.llm && typeof works.llm === 'string') {
+      return this.detectProviderFromModel(works.llm);
+    }
+    
+    return undefined;
+  }
+
+  /**
+   * Detect provider from model name
+   */
+  private detectProviderFromModel(modelName: string): string | undefined {
+    if (!modelName) return undefined;
+    
+    const modelLower = modelName.toLowerCase();
+    
+    // Check if model name contains provider prefix (e.g., "openai/gpt-4")
+    if (modelLower.includes('/')) {
+      const provider = modelLower.split('/')[0];
+      if (['openai', 'anthropic', 'google', 'gemini', 'azure', 'cohere', 'mistral', 'groq', 'together', 'ai21', 'replicate', 'ollama', 'deepinfra'].includes(provider)) {
+        return provider;
+      }
+    }
+    
+    // Check model name patterns
+    if (modelLower.includes('gpt-') || modelLower.includes('gpt')) return 'openai';
+    if (modelLower.includes('claude')) return 'anthropic';
+    if (modelLower.includes('gemini') || modelLower.includes('palm')) return 'google';
+    if (modelLower.includes('command')) return 'cohere';
+    if (modelLower.includes('mistral') || modelLower.includes('mixtral')) return 'mistral';
+    if (modelLower.includes('llama')) return 'groq'; // Common with Groq
+    if (modelLower.includes('j2-')) return 'ai21';
+    if (modelLower.includes('togethercomputer')) return 'together';
+    if (modelLower.includes('replicate')) return 'replicate';
+    if (modelLower.includes('ollama')) return 'ollama';
+    if (modelLower.includes('deepinfra')) return 'deepinfra';
+    
+    return undefined;
+  }
+
+  /**
+   * Execute a task by ID
+   */
+  async executeTask(
+    taskId: string,
+    useStreaming = false
+  ): Promise<{ success: boolean; root_task_id: string; task_id: string; status: string; message: string }> {
+    // First, get task details to detect provider
+    let provider: string | undefined;
+    try {
+      const task = await this.getTask(taskId);
+      provider = this.detectProviderFromTask(task);
+    } catch (error) {
+      // If we can't get task details, continue without provider detection
+      console.debug('Could not get task details for provider detection:', error);
+    }
+    
+    // Make request with LLM key formatted as provider:key if provider is detected
+    const request: JsonRpcRequest = {
+      jsonrpc: '2.0',
+      method: 'tasks.execute',
+      params: {
+        task_id: taskId,
+        use_streaming: useStreaming,
+      },
+      id: ++this.requestId,
+    };
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Get LLM key and format as provider:key if provider is detected
+    if (typeof window !== 'undefined') {
+      let llmKey: string | null = null;
+      
+      if (provider) {
+        // Use provider-specific key
+        llmKey = localStorage.getItem(`llm_api_key_${provider}`);
+      }
+      
+      // Fallback to default key if provider-specific key not found
+      if (!llmKey) {
+        llmKey = localStorage.getItem('llm_api_key');
+      }
+      
+      if (llmKey) {
+        // Format: provider:key or just key (backward compatible)
+        if (provider) {
+          headers['X-LLM-API-KEY'] = `${provider}:${llmKey}`;
+        } else {
+          headers['X-LLM-API-KEY'] = llmKey;
+        }
+      }
+    }
+    
+    const response = await this.client.post<JsonRpcResponse<{ success: boolean; root_task_id: string; task_id: string; status: string; message: string }>>(
+      '/tasks',
+      request,
+      { headers }
+    );
+    
+    if (response.data.error) {
+      throw new Error(response.data.error.message || 'Unknown error');
+    }
+    
+    return response.data.result!;
   }
 
   /**
@@ -221,6 +362,23 @@ export class AIPartnerUpFlowClient {
     return this.rpcRequest<RunningTask[]>('/tasks', 'tasks.running.list', {
       user_id: userId,
       limit,
+    });
+  }
+
+  /**
+   * List all tasks (not just running ones)
+   */
+  async listTasks(params?: {
+    userId?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<Task[]> {
+    return this.rpcRequest<Task[]>('/tasks', 'tasks.list', {
+      user_id: params?.userId,
+      status: params?.status,
+      limit: params?.limit ?? 100,
+      offset: params?.offset ?? 0,
     });
   }
 
@@ -257,6 +415,87 @@ export class AIPartnerUpFlowClient {
   async getAgentCard(): Promise<any> {
     const response = await this.client.get('/.well-known/agent-card');
     return response.data;
+  }
+
+  // LLM Key Configuration Methods (User Config API)
+
+  /**
+   * Set LLM API key for current user
+   */
+  async setLLMKey(
+    apiKey: string,
+    provider?: string,
+    userId?: string
+  ): Promise<{ success: boolean; user_id: string; provider: string }> {
+    return this.rpcRequest<{ success: boolean; user_id: string; provider: string }>('/system', 'config.llm_key.set', {
+      api_key: apiKey,
+      provider: provider,
+      user_id: userId,
+    });
+  }
+
+  /**
+   * Get LLM key status for current user (does not return the actual key)
+   */
+  async getLLMKeyStatus(
+    provider?: string,
+    userId?: string
+  ): Promise<{ has_key: boolean; user_id: string; provider?: string; providers: Record<string, string> }> {
+    return this.rpcRequest<{ has_key: boolean; user_id: string; provider?: string; providers: Record<string, string> }>(
+      '/system',
+      'config.llm_key.get',
+      {
+        provider: provider,
+        user_id: userId,
+      }
+    );
+  }
+
+  /**
+   * Delete LLM API key for current user
+   */
+  async deleteLLMKey(
+    provider?: string,
+    userId?: string
+  ): Promise<{ success: boolean; user_id: string; deleted: boolean; provider: string }> {
+    return this.rpcRequest<{ success: boolean; user_id: string; deleted: boolean; provider: string }>(
+      '/system',
+      'config.llm_key.delete',
+      {
+        provider: provider,
+        user_id: userId,
+      }
+    );
+  }
+
+  // Examples Management Methods
+
+  /**
+   * Initialize examples data
+   */
+  async initExamples(force = false): Promise<{ success: boolean; created_count: number; message: string }> {
+    return this.rpcRequest<{ success: boolean; created_count: number; message: string }>(
+      '/system',
+      'examples.init',
+      {
+        force,
+      }
+    );
+  }
+
+  /**
+   * Check examples status
+   */
+  async getExamplesStatus(): Promise<{
+    initialized: boolean;
+    available: boolean;
+    message: string;
+  }> {
+    return this.rpcRequest<{ initialized: boolean; available: boolean; message: string }>(
+      '/system',
+      'examples.status',
+      {}
+    );
   }
 }
 

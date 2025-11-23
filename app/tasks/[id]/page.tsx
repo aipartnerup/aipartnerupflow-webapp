@@ -7,26 +7,60 @@
  */
 
 import { Container, Title, Button, Group, Card, Text, Badge, Stack, Code, Tabs, Progress } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, Task } from '@/lib/api/aipartnerupflow';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import { IconArrowLeft, IconTree, IconInfoCircle, IconCode, IconFileText } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+import { IconArrowLeft, IconTree, IconInfoCircle, IconCode, IconFileText, IconPlayerPlay } from '@tabler/icons-react';
 import { TaskTreeView } from '@/components/tasks/TaskTreeView';
+import { use } from 'react';
 
-export default function TaskDetailPage({ params }: { params: { id: string } }) {
+export default function TaskDetailPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // Handle params which might be a Promise in Next.js 15+
+  const resolvedParams = 'then' in params ? use(params) : params;
+  const taskId = resolvedParams?.id || '';
 
   const { data: task, isLoading } = useQuery({
-    queryKey: ['task', params.id],
-    queryFn: () => apiClient.getTask(params.id),
+    queryKey: ['task', taskId],
+    queryFn: () => {
+      if (!taskId) {
+        throw new Error('Task ID is required');
+      }
+      return apiClient.getTask(taskId);
+    },
+    enabled: !!taskId,
   });
 
   const { data: taskTree } = useQuery({
-    queryKey: ['task-tree', params.id],
-    queryFn: () => apiClient.getTaskTree(params.id),
-    enabled: !!task,
+    queryKey: ['task-tree', taskId],
+    queryFn: () => apiClient.getTaskTree(taskId),
+    enabled: !!task && !!taskId,
+  });
+
+  const executeMutation = useMutation({
+    mutationFn: (taskId: string) => apiClient.executeTask(taskId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['running-tasks'] });
+      notifications.show({
+        title: 'Success',
+        message: data.message || 'Task execution started',
+        color: 'green',
+      });
+    },
+    onError: (error: any) => {
+      notifications.show({
+        title: 'Error',
+        message: error.message || 'Failed to execute task',
+        color: 'red',
+      });
+    },
   });
 
   const getStatusColor = (status?: string) => {
@@ -62,7 +96,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
 
   return (
     <Container size="xl">
-      <Group mb="xl">
+      <Group mb="xl" justify="space-between">
         <Button
           variant="subtle"
           leftSection={<IconArrowLeft size={16} />}
@@ -70,6 +104,16 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
         >
           {t('common.back')}
         </Button>
+        {(task.status === 'pending' || task.status === 'failed') && (
+          <Button
+            leftSection={<IconPlayerPlay size={16} />}
+            onClick={() => executeMutation.mutate(taskId)}
+            loading={executeMutation.isPending}
+            color="blue"
+          >
+            Execute Task
+          </Button>
+        )}
       </Group>
 
       <Title order={1} mb="xl">{task.name}</Title>

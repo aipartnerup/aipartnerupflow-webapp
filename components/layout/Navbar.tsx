@@ -30,8 +30,10 @@ export function AppNavbar() {
   const { t, i18n } = useTranslation();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const [language, setLanguage] = useState(i18n.language);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== 'undefined') {
       const savedLanguage = localStorage.getItem('language') || 'en';
       setLanguage(savedLanguage);
@@ -119,8 +121,8 @@ export function AppNavbar() {
         <Divider my="md" />
         <Group p="md" gap="sm" direction="column">
           <NavLink
-            label={colorScheme === 'dark' ? t('common.lightMode') : t('common.darkMode')}
-            leftSection={colorScheme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}
+            label={mounted && colorScheme === 'dark' ? t('common.lightMode') : t('common.darkMode')}
+            leftSection={mounted && colorScheme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}
             onClick={toggleColorScheme}
             style={{ 
               cursor: 'pointer',
