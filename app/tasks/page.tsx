@@ -272,7 +272,7 @@ export default function TaskListPage() {
                   └─
                 </Text>
               )}
-              <Text size="sm" ff="monospace" c={level > 0 ? (colorScheme === 'dark' ? 'dark.0' : 'gray.9') : undefined}>
+              <Text size="sm" ff="monospace" c={colorScheme === 'dark' ? 'dark.0' : 'gray.9'}>
                 {task.id.substring(0, 8)}...
               </Text>
             </Group>
@@ -281,7 +281,7 @@ export default function TaskListPage() {
             <Text 
               fw={level > 0 ? 500 : undefined}
               style={{ marginLeft: !isRoot ? `${level * 20}px` : 0 }} 
-              c={level > 0 ? (colorScheme === 'dark' ? 'dark.0' : 'gray.9') : undefined}
+              c={colorScheme === 'dark' ? 'dark.0' : 'gray.9'}
             >
               {task.name}
             </Text>
@@ -292,7 +292,7 @@ export default function TaskListPage() {
             </Badge>
           </Table.Td>
           <Table.Td>
-            <Text c={level > 0 ? (colorScheme === 'dark' ? 'dark.0' : 'gray.9') : undefined}>
+            <Text c={colorScheme === 'dark' ? 'dark.0' : 'gray.9'}>
               {Math.round((task.progress || 0) * 100)}%
             </Text>
           </Table.Td>
