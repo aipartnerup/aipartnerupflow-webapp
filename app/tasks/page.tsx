@@ -39,34 +39,6 @@ export default function TaskListPage() {
     }),
   });
 
-  // Check examples status
-  const { data: examplesStatus } = useQuery({
-    queryKey: ['examples-status'],
-    queryFn: () => apiClient.getExamplesStatus(),
-    retry: false,
-  });
-
-  // Initialize examples mutation
-  const initExamplesMutation = useMutation({
-    mutationFn: (force: boolean) => apiClient.initExamples(force),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['examples-status'] });
-      notifications.show({
-        title: 'Success',
-        message: data.message,
-        color: 'green',
-      });
-    },
-    onError: (error: any) => {
-      notifications.show({
-        title: 'Error',
-        message: error.message || 'Failed to initialize examples',
-        color: 'red',
-      });
-    },
-  });
-
   // Initialize demo tasks mutation
   const initDemoTasksMutation = useMutation({
     mutationFn: () => apiClient.initDemoTasks(),
@@ -436,42 +408,6 @@ export default function TaskListPage() {
               </Button>
             </Group>
           </Stack>
-          {examplesStatus?.available && (
-            <Stack gap="sm" align="center" style={{ maxWidth: 500 }}>
-              <Alert icon={<IconInfoCircle size={16} />} color="blue" title="Initialize Example Data">
-                {examplesStatus.initialized
-                  ? 'Example tasks are already initialized. You can force re-initialization if needed.'
-                  : 'Alternatively, initialize example tasks to get started. This will create sample tasks demonstrating various features.'}
-              </Alert>
-              <Group>
-                <Button
-                  leftSection={<IconDatabase size={16} />}
-                  onClick={() => initExamplesMutation.mutate(false)}
-                  loading={initExamplesMutation.isPending}
-                  variant={examplesStatus.initialized ? 'outline' : 'filled'}
-                >
-                  {examplesStatus.initialized ? 'Re-initialize Examples' : 'Initialize Examples'}
-                </Button>
-                {examplesStatus.initialized && (
-                  <Button
-                    variant="outline"
-                    color="red"
-                    onClick={() => initExamplesMutation.mutate(true)}
-                    loading={initExamplesMutation.isPending}
-                  >
-                    Force Re-initialize
-                  </Button>
-                )}
-              </Group>
-            </Stack>
-          )}
-          {!examplesStatus?.available && (
-            <Alert icon={<IconInfoCircle size={16} />} color="yellow" title="Examples Module Not Available">
-              Install examples module to enable example data initialization:
-              <br />
-              <code>pip install aipartnerupflow[examples]</code>
-            </Alert>
-          )}
         </Stack>
       ) : (
         <Table striped highlightOnHover>

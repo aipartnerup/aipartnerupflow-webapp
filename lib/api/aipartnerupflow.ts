@@ -148,35 +148,92 @@ export class AIPartnerUpFlowClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
-        // Enhanced error logging
-        if (error.code === 'ECONNABORTED') {
-          console.error('API Request Timeout:', {
-            url: error.config?.url,
-            baseURL: this.baseURL,
-            message: 'Request timed out after 30 seconds',
-          });
-        } else if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
-          console.error('API Network Error:', {
-            url: error.config?.url,
-            baseURL: this.baseURL,
-            message: 'Network request failed. Please check:',
-            checks: [
-              '1. Is the API server running?',
-              `2. Is the API URL correct? (${this.baseURL})`,
-              '3. Are there CORS issues?',
-              '4. Is the network connection working?',
-            ],
-          });
-        } else if (error.response) {
+        // Enhanced error logging with better error object handling
+        const errorCode = error?.code || error?.errno || '';
+        const errorMessage = error?.message || String(error) || 'Unknown error';
+        const requestUrl = error?.config?.url || 'unknown';
+        const fullUrl = error?.config?.baseURL 
+          ? `${error.config.baseURL}${requestUrl}` 
+          : `${this.baseURL}${requestUrl}`;
+
+        // Use console.group for better organization
+        if (errorCode === 'ECONNABORTED' || errorMessage.includes('timeout')) {
+          console.group('⏱️ API Request Timeout');
+          console.error('URL:', fullUrl);
+          console.error('Base URL:', this.baseURL);
+          console.error('Error Code:', errorCode);
+          console.error('Error Message:', errorMessage);
+          console.error('Message: Request timed out after 30 seconds');
+          console.groupEnd();
+        } else if (errorCode === 'ERR_NETWORK' || errorMessage === 'Network Error' || errorMessage.includes('Network Error')) {
+          console.group('🌐 API Network Error');
+          console.error('Full URL:', fullUrl);
+          console.error('Base URL:', this.baseURL);
+          console.error('Endpoint:', requestUrl);
+          console.error('Error Code:', errorCode);
+          console.error('Error Message:', errorMessage);
+          console.error('Error Name:', error?.name || 'N/A');
+          console.error('--- Troubleshooting Steps ---');
+          console.error('1. Is the API server running?');
+          console.error(`2. Is the API URL correct? (${this.baseURL})`);
+          console.error('3. Are there CORS issues?');
+          console.error('4. Is the network connection working?');
+          console.error('5. Check browser console for CORS errors');
+          console.error('--- Error Details ---');
+          console.error('Error Object:', error);
+          if (error?.stack) {
+            console.error('Stack Trace (first 5 lines):');
+            console.error(error.stack.split('\n').slice(0, 5).join('\n'));
+          }
+          console.groupEnd();
+        } else if (error?.response) {
           // Server responded with error status
-          console.error('API Error Response:', {
-            status: error.response.status,
-            statusText: error.response.statusText,
-            url: error.config?.url,
-            data: error.response.data,
-          });
+          const status = error.response.status;
+          const method = error?.config?.method?.toUpperCase() || 'UNKNOWN';
+          
+          console.group('❌ API Error Response');
+          console.error('Status:', status);
+          console.error('Status Text:', error.response.statusText);
+          console.error('Method:', method);
+          console.error('URL:', fullUrl);
+          console.error('Response Data:', error.response.data);
+          
+          // Special handling for 401 errors
+          if (status === 401) {
+            console.error('--- Authentication Error ---');
+            if (method === 'OPTIONS') {
+              console.error('⚠️ CORS Preflight Request Failed!');
+              console.error('The server is rejecting OPTIONS (CORS preflight) requests with 401.');
+              console.error('This is a server configuration issue. The server should allow OPTIONS requests without authentication.');
+              console.error('Solution: Configure the server to allow OPTIONS requests without requiring authentication.');
+            } else {
+              console.error('Authentication failed. Possible causes:');
+              console.error('1. Missing or invalid Authorization token');
+              console.error('2. Missing or invalid authentication cookie');
+              console.error('3. Token expired');
+              console.error('4. Server authentication middleware misconfigured');
+              const hasToken = typeof window !== 'undefined' && localStorage.getItem('auth_token');
+              console.error('Token in localStorage:', hasToken ? 'Present' : 'Missing');
+            }
+          }
+          
+          // Special handling for CORS errors (status 0 or no response)
+          if (status === 0 || !error.response) {
+            console.error('--- Possible CORS Issue ---');
+            console.error('This might be a CORS (Cross-Origin Resource Sharing) problem.');
+            console.error('The server may not be configured to allow requests from this origin.');
+          }
+          
+          console.groupEnd();
         } else {
-          console.error('API Error:', error);
+          // Other errors
+          console.group('⚠️ API Error (Other)');
+          console.error('Error Code:', errorCode);
+          console.error('Error Message:', errorMessage);
+          console.error('Error Name:', error?.name || 'N/A');
+          console.error('URL:', fullUrl);
+          console.error('Error Object:', error);
+          console.groupEnd();
         }
         return Promise.reject(error);
       }
@@ -201,15 +258,60 @@ export class AIPartnerUpFlowClient {
       return response.data.result as T;
     } catch (error: any) {
       // Handle network errors with more descriptive messages
-      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
-        const errorMessage = `Network Error: Unable to connect to API server at ${this.baseURL}${endpoint}. ` +
-          `Please ensure the API server is running and accessible.`;
-        throw new Error(errorMessage);
+      const errorCode = error?.code || error?.errno || '';
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+      
+      if (errorCode === 'ERR_NETWORK' || errorMessage === 'Network Error' || errorMessage.includes('Network Error')) {
+        // Provide a more helpful error message
+        let detailedMessage = `Unable to connect to API server at ${this.baseURL}${endpoint}.\n\n`;
+        detailedMessage += `Possible solutions:\n`;
+        detailedMessage += `1. Ensure the API server is running (check if you can access ${this.baseURL} in your browser)\n`;
+        detailedMessage += `2. Verify the API URL is correct (current: ${this.baseURL})\n`;
+        detailedMessage += `3. Check for CORS issues in the browser console\n`;
+        detailedMessage += `4. If using a different port/domain, set NEXT_PUBLIC_API_URL environment variable\n`;
+        detailedMessage += `5. Check your network connection and firewall settings`;
+        
+        const networkError = new Error(detailedMessage);
+        (networkError as any).code = errorCode;
+        (networkError as any).originalError = error;
+        (networkError as any).isNetworkError = true;
+        (networkError as any).apiUrl = this.baseURL;
+        throw networkError;
       }
       
       // Handle timeout errors
-      if (error.code === 'ECONNABORTED') {
-        throw new Error(`Request timeout: The API server at ${this.baseURL}${endpoint} did not respond within 30 seconds.`);
+      if (errorCode === 'ECONNABORTED' || errorMessage.includes('timeout')) {
+        const timeoutError = new Error(
+          `Request timeout: The API server at ${this.baseURL}${endpoint} did not respond within 30 seconds.`
+        );
+        (timeoutError as any).code = errorCode;
+        (timeoutError as any).originalError = error;
+        throw timeoutError;
+      }
+      
+      // Handle 401 Unauthorized errors (especially CORS preflight)
+      if (error.response?.status === 401) {
+        const method = error?.config?.method?.toUpperCase() || '';
+        let authErrorMessage = `Authentication failed (401) for ${this.baseURL}${endpoint}`;
+        
+        if (method === 'OPTIONS') {
+          authErrorMessage = `CORS Preflight Failed: The server rejected the OPTIONS request with 401 Unauthorized.\n\n` +
+            `This is a server configuration issue. The server must allow OPTIONS (CORS preflight) requests without authentication.\n\n` +
+            `Server-side fix needed: Configure CORS middleware to skip authentication for OPTIONS requests.`;
+        } else {
+          authErrorMessage += `\n\nPossible causes:\n` +
+            `- Missing or invalid authentication token\n` +
+            `- Missing or invalid authentication cookie\n` +
+            `- Token expired\n` +
+            `- Server authentication middleware misconfigured`;
+        }
+        
+        const authError = new Error(authErrorMessage);
+        (authError as any).status = 401;
+        (authError as any).isAuthError = true;
+        (authError as any).isCorsPreflight = method === 'OPTIONS';
+        (authError as any).originalError = error;
+        throw authError;
       }
       
       // Handle RPC errors
@@ -217,8 +319,12 @@ export class AIPartnerUpFlowClient {
         throw new Error(error.response.data.error.message || 'RPC Error');
       }
       
-      // Re-throw other errors
-      throw error;
+      // Re-throw other errors, but wrap them if they don't have a message
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error(`API Error: ${errorMessage}`);
+      }
     }
   }
 
@@ -736,36 +842,6 @@ export class AIPartnerUpFlowClient {
         provider: provider,
         user_id: userId,
       }
-    );
-  }
-
-  // Examples Management Methods
-
-  /**
-   * Initialize examples data
-   */
-  async initExamples(force = false): Promise<{ success: boolean; created_count: number; message: string }> {
-    return this.rpcRequest<{ success: boolean; created_count: number; message: string }>(
-      '/system',
-      'examples.init',
-      {
-        force,
-      }
-    );
-  }
-
-  /**
-   * Check examples status
-   */
-  async getExamplesStatus(): Promise<{
-    initialized: boolean;
-    available: boolean;
-    message: string;
-  }> {
-    return this.rpcRequest<{ initialized: boolean; available: boolean; message: string }>(
-      '/system',
-      'examples.status',
-      {}
     );
   }
 
