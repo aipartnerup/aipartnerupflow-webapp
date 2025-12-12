@@ -865,7 +865,7 @@ export class AIPartnerUpFlowClient {
         created_count: number;
         task_ids: string[];
         message: string;
-      }>('/api/demo/tasks/init');
+      }>('/api/demo/tasks/init-executors');
       
       return response.data;
     } catch (error: any) {
