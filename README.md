@@ -182,7 +182,7 @@ For standard `aipartnerupflow` servers:
 
 For `aipartnerupflow-demo` servers:
 - **JWT token is optional**: Demo servers automatically generate tokens via cookies
-- If no token is set, the browser automatically sends cookies (`demo_jwt_token`)
+- If no token is set, the browser automatically sends cookies (`authorization`)
 - Demo server middleware extracts the token from cookies and adds it to the Authorization header
 - If a manual token is provided, it will override the auto-generated token
 

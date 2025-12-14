@@ -59,9 +59,9 @@ export function useAutoLogin(): AutoLoginStatus {
 
         // Call the auto-login endpoint
         // This request will go through SessionCookieMiddleware, which will:
-        // 1. Check if demo_jwt_token cookie exists
+        // 1. Check if authorization cookie exists
         // 2. If not, generate user_id from browser fingerprint and create JWT token
-        // 3. Set the JWT token in cookie (demo_jwt_token)
+        // 3. Set the JWT token in cookie (authorization)
         // 4. Subsequent API requests will automatically include this cookie
         const response = await fetch(`${apiUrl}${autoLoginPath}`, {
           method: 'GET',
