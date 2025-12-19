@@ -40,21 +40,35 @@ export default function TaskListPage() {
     }),
   });
 
+  // Check demo init status
+  const { data: demoInitStatus, isLoading: isLoadingDemoStatus, error: demoStatusError } = useQuery({
+    queryKey: ['demo-init-status'],
+    queryFn: () => apiClient.checkDemoInitStatus(),
+    retry: false,
+    refetchOnWindowFocus: false,
+    // Don't show error if API fails, just don't show the button
+    onError: (error) => {
+      console.debug('Failed to check demo init status:', error);
+    },
+  });
+
   // Initialize demo tasks mutation
   const initDemoTasksMutation = useMutation({
     mutationFn: () => apiClient.initDemoTasks(),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['demo-init-status'] });
       notifications.show({
         title: 'Success',
         message: data.message || `Demo tasks initialized successfully. Created ${data.created_count} tasks.`,
         color: 'green',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize demo tasks';
       notifications.show({
         title: 'Error',
-        message: error.message || 'Failed to initialize demo tasks',
+        message: errorMessage,
         color: 'red',
       });
     },
@@ -415,26 +429,61 @@ export default function TaskListPage() {
         />
       </Group>
 
+      {/* Show demo init button if can_init is true */}
+      {!isLoadingDemoStatus && demoInitStatus?.success && demoInitStatus.can_init && (
+        <Alert 
+          icon={<IconInfoCircle size={16} />} 
+          color="blue" 
+          title="Initialize Demo Tasks"
+          mb="md"
+          withCloseButton
+          onClose={() => {
+            // Optionally hide the alert after closing
+          }}
+        >
+          <Group justify="space-between" align="center">
+            <Text size="sm">
+              {demoInitStatus.message || `${demoInitStatus.missing_executors?.length || 0} executors need demo tasks. Click the button to initialize.`}
+            </Text>
+            <Button
+              leftSection={<IconDatabase size={16} />}
+              onClick={() => initDemoTasksMutation.mutate()}
+              loading={initDemoTasksMutation.isPending}
+              size="sm"
+            >
+              Initialize Demo Tasks
+            </Button>
+          </Group>
+        </Alert>
+      )}
+
       {isLoading ? (
         <Text c="dimmed">{t('common.loading')}</Text>
       ) : filteredTasks.length === 0 ? (
         <Stack gap="md" align="center" py="xl">
           <Text c="dimmed" size="lg">{t('tasks.noTasks')}</Text>
-          <Stack gap="sm" align="center" style={{ maxWidth: 500 }}>
-            <Alert icon={<IconInfoCircle size={16} />} color="blue" title="Get Started with Demo Tasks">
-              Initialize demo tasks to get started. This will create sample tasks demonstrating various features that you can run directly.
+          {!isLoadingDemoStatus && demoInitStatus?.can_init && (
+            <Stack gap="sm" align="center" style={{ maxWidth: 500 }}>
+              <Alert icon={<IconInfoCircle size={16} />} color="blue" title="Get Started with Demo Tasks">
+                {demoInitStatus.message || 'Initialize demo tasks to get started. This will create sample tasks demonstrating various features that you can run directly.'}
+              </Alert>
+              <Group>
+                <Button
+                  leftSection={<IconDatabase size={16} />}
+                  onClick={() => initDemoTasksMutation.mutate()}
+                  loading={initDemoTasksMutation.isPending}
+                  variant="filled"
+                >
+                  Initialize Demo Tasks
+                </Button>
+              </Group>
+            </Stack>
+          )}
+          {!isLoadingDemoStatus && demoInitStatus && !demoInitStatus.can_init && (
+            <Alert icon={<IconInfoCircle size={16} />} color="green" title="Demo Tasks Already Initialized">
+              {demoInitStatus.message || 'All demo tasks have already been initialized. You can create new tasks using the "Create Task" button.'}
             </Alert>
-            <Group>
-              <Button
-                leftSection={<IconDatabase size={16} />}
-                onClick={() => initDemoTasksMutation.mutate()}
-                loading={initDemoTasksMutation.isPending}
-                variant="filled"
-              >
-                Initialize Demo Tasks
-              </Button>
-            </Group>
-          </Stack>
+          )}
         </Stack>
       ) : (
         <Table striped highlightOnHover>

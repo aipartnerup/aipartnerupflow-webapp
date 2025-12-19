@@ -893,6 +893,41 @@ export class AIPartnerUpFlowClient {
   // Demo Tasks Management Methods
 
   /**
+   * Check demo init status for current user
+   * 
+   * Checks which executors already have demo tasks for the current user.
+   * Returns status information including whether demo init can be performed.
+   */
+  async checkDemoInitStatus(): Promise<{
+    success: boolean;
+    can_init: boolean;
+    total_executors: number;
+    existing_executors: string[];
+    missing_executors: string[];
+    executor_details: Record<string, any>;
+    message: string;
+  }> {
+    try {
+      const response = await this.client.get<{
+        success: boolean;
+        can_init: boolean;
+        total_executors: number;
+        existing_executors: string[];
+        missing_executors: string[];
+        executor_details: Record<string, any>;
+        message: string;
+      }>('/api/demo/tasks/init-status');
+      
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        throw new Error(error.response.data.message || error.response.data.error || 'Failed to check demo init status');
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Initialize demo tasks for current user
    * 
    * Creates demo tasks for the current user (user_id extracted from JWT/cookie automatically).
