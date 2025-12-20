@@ -18,6 +18,7 @@ import {
   IconLanguage,
   IconSun,
   IconMoon,
+  IconBrandGithub,
 } from '@tabler/icons-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -177,6 +178,31 @@ export function AppNavbar({ onNavigate }: AppNavbarProps) {
               { value: 'zh', label: '中文' },
             ]}
             style={{ width: '100%' }}
+          />
+          <Divider my="xs" />
+          <NavLink
+            label="WebApp"
+            leftSection={<IconBrandGithub size={18} />}
+            href="https://github.com/aipartnerup/aipartnerupflow-webapp"
+            target="_blank"
+            rel="noopener noreferrer"
+            component="a"
+            style={{ 
+              cursor: 'pointer',
+              borderRadius: 'var(--mantine-radius-md)',
+            }}
+          />
+          <NavLink
+            label="API Server"
+            leftSection={<IconBrandGithub size={18} />}
+            href="https://github.com/aipartnerup/aipartnerupflow-demo"
+            target="_blank"
+            rel="noopener noreferrer"
+            component="a"
+            style={{ 
+              cursor: 'pointer',
+              borderRadius: 'var(--mantine-radius-md)',
+            }}
           />
         </Stack>
       </AppShell.Section>
