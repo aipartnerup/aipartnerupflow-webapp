@@ -167,6 +167,7 @@ export default function LLMKeySettingsPage() {
               onClick={() => setHeaderKeyMutation.mutate({ key: headerKey, provider: headerProvider || undefined })}
               loading={setHeaderKeyMutation.isPending}
               disabled={!headerKey}
+              style={{ marginTop: 'var(--mantine-spacing-md)' }}
             >
               Save
             </Button>
@@ -179,6 +180,7 @@ export default function LLMKeySettingsPage() {
                   setHeaderProvider('');
                   setHeaderKeyMutation.mutate({ key: '' });
                 }}
+                style={{ marginTop: 'var(--mantine-spacing-md)' }}
               >
                 Clear
               </Button>
@@ -226,6 +228,7 @@ export default function LLMKeySettingsPage() {
               onClick={() => setConfigKeyMutation.mutate(configKey)}
               loading={setConfigKeyMutation.isPending}
               disabled={!configKey}
+              style={{ marginTop: 'var(--mantine-spacing-md)' }}
             >
               Save to Server
             </Button>
@@ -235,6 +238,7 @@ export default function LLMKeySettingsPage() {
                 color="red"
                 onClick={() => deleteConfigKeyMutation.mutate()}
                 loading={deleteConfigKeyMutation.isPending}
+                style={{ marginTop: 'var(--mantine-spacing-md)' }}
               >
                 Delete
               </Button>
