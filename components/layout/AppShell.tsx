@@ -39,7 +39,6 @@ export function AppShellWrapper({ children }: AppShellWrapperProps) {
         width: desktopOpened ? 260 : 60,
         breakpoint: 'sm',
         collapsed: { mobile: !mobileOpened, desktop: false },
-        withBorder: false,
       }}
       padding="md"
     >
