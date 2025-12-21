@@ -763,23 +763,6 @@ function TaskListPageContent() {
       ) : filteredTasks.length === 0 ? (
         <Stack gap="md" align="center" py="xl">
           <Text c="dimmed" size="lg">{t('tasks.noTasks')}</Text>
-          {!isLoadingDemoStatus && demoInitStatus?.can_init && (
-            <Stack gap="sm" align="center" style={{ maxWidth: 500 }}>
-              <Alert icon={<IconInfoCircle size={16} />} color="blue" title="Get Started with Demo Tasks">
-                {demoInitStatus.message || 'Initialize demo tasks to get started. This will create sample tasks demonstrating various features that you can run directly.'}
-              </Alert>
-              <Group>
-                <Button
-                  leftSection={<IconDatabase size={16} />}
-                  onClick={() => initDemoTasksMutation.mutate()}
-                  loading={initDemoTasksMutation.isPending}
-                  variant="filled"
-                >
-                  Initialize Demo Tasks
-                </Button>
-              </Group>
-            </Stack>
-          )}
           {!isLoadingDemoStatus && demoInitStatus && !demoInitStatus.can_init && (
             <Alert icon={<IconInfoCircle size={16} />} color="green" title="Demo Tasks Already Initialized">
               {demoInitStatus.message || 'All demo tasks have already been initialized. You can create new tasks using the "Create Task" button.'}
