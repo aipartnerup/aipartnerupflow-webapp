@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   },
   
   // Optional: Add trailing slash for better static hosting compatibility
-  trailingSlash: false,
+  trailingSlash: true,
 };
 
 export default nextConfig;
