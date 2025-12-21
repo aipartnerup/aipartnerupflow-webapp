@@ -137,45 +137,6 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
           className={isCollapsed ? 'collapsed-navlink' : ''}
         />
 
-        {!isCollapsed && (
-          <NavLink
-            label={t('nav.taskManagement')}
-            leftSection={<IconList size={18} />}
-            rightSection={<IconChevronRight size={16} />}
-            style={{ marginBottom: 2 }}
-          >
-            <NavLink
-              label={t('nav.taskList')}
-              active={isActive('/tasks')}
-              onClick={() => {
-                router.push('/tasks');
-                onNavigate?.();
-              }}
-              pl="xl"
-            />
-            <NavLink
-              label={t('nav.createTask')}
-              leftSection={<IconPlus size={18} />}
-              active={isActive('/tasks/create')}
-              onClick={() => {
-                router.push('/tasks/create');
-                onNavigate?.();
-              }}
-              pl="xl"
-            />
-            <NavLink
-              label={t('nav.runningTasks')}
-              leftSection={<IconPlayerPlay size={18} />}
-              active={isActive('/tasks/running')}
-              onClick={() => {
-                router.push('/tasks/running');
-                onNavigate?.();
-              }}
-              pl="xl"
-            />
-          </NavLink>
-        )}
-
         {isCollapsed ? (
           <>
             <NavLink
