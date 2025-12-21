@@ -47,6 +47,7 @@ export default function DashboardPage() {
     queryFn: () => apiClient.checkDemoInitStatus(),
     retry: false,
     refetchOnWindowFocus: false,
+    refetchOnMount: true, // Always refetch when component mounts to ensure check happens on first visit
     enabled: autoLoginReady, // Only call after auto-login is ready
   });
 
@@ -56,6 +57,15 @@ export default function DashboardPage() {
       console.debug('Failed to check demo init status:', demoStatusError);
     }
   }, [demoStatusError]);
+
+  // Ensure demo init status is checked when auto-login becomes ready
+  // This ensures the check happens on first visit to dashboard
+  useEffect(() => {
+    if (autoLoginReady) {
+      // When auto-login becomes ready, ensure the demo init status query is executed
+      queryClient.refetchQueries({ queryKey: ['demo-init-status'] });
+    }
+  }, [autoLoginReady, queryClient]);
 
   // Initialize demo tasks mutation
   const initDemoTasksMutation = useMutation({
