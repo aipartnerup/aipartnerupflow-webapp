@@ -6,7 +6,7 @@
  * Left sidebar navigation with menu items, sub-menus, and bottom controls
  */
 
-import { AppShell, NavLink, Group, Text, Select, Divider, Stack, Switch } from '@mantine/core';
+import { AppShell, NavLink, Group, Text, Select, Divider, Stack, Switch, Burger } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import {
   IconDashboard,
@@ -29,9 +29,13 @@ import { useUseDemo } from '@/lib/contexts/UseDemoContext';
 
 interface AppNavbarProps {
   onNavigate?: () => void;
+  mobileOpened?: boolean;
+  desktopOpened?: boolean;
+  onToggleMobile?: () => void;
+  onToggleDesktop?: () => void;
 }
 
-export function AppNavbar({ onNavigate }: AppNavbarProps) {
+export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMobile, onToggleDesktop }: AppNavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { t, i18n } = useTranslation();
@@ -61,171 +65,342 @@ export function AppNavbar({ onNavigate }: AppNavbarProps) {
   };
 
   const isActive = (path: string) => pathname === path;
+  const isCollapsed = !desktopOpened;
 
   return (
     <AppShell.Navbar p="xs" style={{ overflowY: 'auto' }}>
-      <AppShell.Section>
-        <Group p="xs" gap="xs">
+      <AppShell.Section style={{ flexShrink: 0 }}>
+        <Group 
+          p="xs" 
+          gap="xs" 
+          wrap="nowrap" 
+          style={{ 
+            width: '100%',
+            justifyContent: isCollapsed ? 'center' : 'flex-start'
+          }}
+        >
+          {/* Burger button - always visible */}
+          {onToggleMobile && (
+            <Burger
+              opened={mobileOpened}
+              onClick={onToggleMobile}
+              hiddenFrom="sm"
+              size="sm"
+              className="navbar-burger-button"
+              style={{ flexShrink: 0 }}
+            />
+          )}
+          {onToggleDesktop && (
+            <Burger
+              opened={desktopOpened}
+              onClick={onToggleDesktop}
+              visibleFrom="sm"
+              size="sm"
+              className="navbar-burger-button"
+              style={{ flexShrink: 0 }}
+            />
+          )}
           <Image
             src="/logo.svg"
             alt="AIPartnerUpFlow Logo"
             width={32}
             height={32}
-            style={{ objectFit: 'contain' }}
+            style={{ objectFit: 'contain', flexShrink: 0 }}
+            className="navbar-logo"
           />
-          <Text 
-            fw={700} 
-            size="lg" 
-            style={{ userSelect: 'none' }}
-            className="navbar-brand-text"
-          >
-            AIPartnerUpFlow
-          </Text>
+          {!isCollapsed && (
+            <Text 
+              fw={700} 
+              size="lg" 
+              style={{ userSelect: 'none', flexShrink: 0 }}
+              className="navbar-brand-text"
+            >
+              AIPartnerUpFlow
+            </Text>
+          )}
         </Group>
       </AppShell.Section>
 
       <AppShell.Section grow mt={0}>
         <NavLink
-          label={t('nav.dashboard')}
+          label={isCollapsed ? '' : t('nav.dashboard')}
           leftSection={<IconDashboard size={18} />}
           active={isActive('/')}
           onClick={() => {
             router.push('/');
             onNavigate?.();
           }}
-          style={{ marginBottom: 2 }}
+          style={{ 
+            marginBottom: 2,
+            justifyContent: isCollapsed ? 'center' : 'flex-start'
+          }}
+          className={isCollapsed ? 'collapsed-navlink' : ''}
         />
 
-        <NavLink
-          label={t('nav.taskManagement')}
-          leftSection={<IconList size={18} />}
-          rightSection={<IconChevronRight size={16} />}
-          style={{ marginBottom: 2 }}
-        >
+        {!isCollapsed && (
           <NavLink
-            label={t('nav.taskList')}
-            active={isActive('/tasks')}
-            onClick={() => {
-              router.push('/tasks');
-              onNavigate?.();
-            }}
-            pl="xl"
-          />
+            label={t('nav.taskManagement')}
+            leftSection={<IconList size={18} />}
+            rightSection={<IconChevronRight size={16} />}
+            style={{ marginBottom: 2 }}
+          >
+            <NavLink
+              label={t('nav.taskList')}
+              active={isActive('/tasks')}
+              onClick={() => {
+                router.push('/tasks');
+                onNavigate?.();
+              }}
+              pl="xl"
+            />
+            <NavLink
+              label={t('nav.createTask')}
+              leftSection={<IconPlus size={18} />}
+              active={isActive('/tasks/create')}
+              onClick={() => {
+                router.push('/tasks/create');
+                onNavigate?.();
+              }}
+              pl="xl"
+            />
+            <NavLink
+              label={t('nav.runningTasks')}
+              leftSection={<IconPlayerPlay size={18} />}
+              active={isActive('/tasks/running')}
+              onClick={() => {
+                router.push('/tasks/running');
+                onNavigate?.();
+              }}
+              pl="xl"
+            />
+          </NavLink>
+        )}
+
+        {isCollapsed ? (
+          <>
+            <NavLink
+              label=""
+              leftSection={<IconList size={18} />}
+              active={isActive('/tasks')}
+              onClick={() => {
+                router.push('/tasks');
+                onNavigate?.();
+              }}
+              style={{ 
+                marginBottom: 2,
+                justifyContent: 'center'
+              }}
+              className="collapsed-navlink"
+            />
+            <NavLink
+              label=""
+              leftSection={<IconPlus size={18} />}
+              active={isActive('/tasks/create')}
+              onClick={() => {
+                router.push('/tasks/create');
+                onNavigate?.();
+              }}
+              style={{ 
+                marginBottom: 2,
+                justifyContent: 'center'
+              }}
+              className="collapsed-navlink"
+            />
+            <NavLink
+              label=""
+              leftSection={<IconPlayerPlay size={18} />}
+              active={isActive('/tasks/running')}
+              onClick={() => {
+                router.push('/tasks/running');
+                onNavigate?.();
+              }}
+              style={{ 
+                marginBottom: 2,
+                justifyContent: 'center'
+              }}
+              className="collapsed-navlink"
+            />
+          </>
+        ) : (
           <NavLink
-            label={t('nav.createTask')}
-            leftSection={<IconPlus size={18} />}
-            active={isActive('/tasks/create')}
-            onClick={() => {
-              router.push('/tasks/create');
-              onNavigate?.();
-            }}
-            pl="xl"
-          />
-          <NavLink
-            label={t('nav.runningTasks')}
-            leftSection={<IconPlayerPlay size={18} />}
-            active={isActive('/tasks/running')}
-            onClick={() => {
-              router.push('/tasks/running');
-              onNavigate?.();
-            }}
-            pl="xl"
-          />
-        </NavLink>
+            label={t('nav.taskManagement')}
+            leftSection={<IconList size={18} />}
+            rightSection={<IconChevronRight size={16} />}
+            style={{ marginBottom: 2 }}
+          >
+            <NavLink
+              label={t('nav.taskList')}
+              active={isActive('/tasks')}
+              onClick={() => {
+                router.push('/tasks');
+                onNavigate?.();
+              }}
+              pl="xl"
+            />
+            <NavLink
+              label={t('nav.createTask')}
+              leftSection={<IconPlus size={18} />}
+              active={isActive('/tasks/create')}
+              onClick={() => {
+                router.push('/tasks/create');
+                onNavigate?.();
+              }}
+              pl="xl"
+            />
+            <NavLink
+              label={t('nav.runningTasks')}
+              leftSection={<IconPlayerPlay size={18} />}
+              active={isActive('/tasks/running')}
+              onClick={() => {
+                router.push('/tasks/running');
+                onNavigate?.();
+              }}
+              pl="xl"
+            />
+          </NavLink>
+        )}
 
         <NavLink
-          label={t('nav.settings')}
+          label={isCollapsed ? '' : t('nav.settings')}
           leftSection={<IconSettings size={18} />}
-          rightSection={<IconChevronRight size={16} />}
-          style={{ marginBottom: 2 }}
+          rightSection={!isCollapsed ? <IconChevronRight size={16} /> : undefined}
+          style={{ 
+            marginBottom: 2,
+            justifyContent: isCollapsed ? 'center' : 'flex-start'
+          }}
+          className={isCollapsed ? 'collapsed-navlink' : ''}
         >
-          <NavLink
-            label={t('nav.apiSettings')}
-            active={isActive('/settings') && !isActive('/settings/llm')}
-            onClick={() => {
-              router.push('/settings');
-              onNavigate?.();
-            }}
-            pl="xl"
-          />
-          <NavLink
-            label={t('nav.llmSettings')}
-            active={isActive('/settings/llm')}
-            onClick={() => {
-              router.push('/settings/llm');
-              onNavigate?.();
-            }}
-            pl="xl"
-          />
+          {!isCollapsed && (
+            <>
+              <NavLink
+                label={t('nav.apiSettings')}
+                active={isActive('/settings') && !isActive('/settings/llm')}
+                onClick={() => {
+                  router.push('/settings');
+                  onNavigate?.();
+                }}
+                pl="xl"
+              />
+              <NavLink
+                label={t('nav.llmSettings')}
+                active={isActive('/settings/llm')}
+                onClick={() => {
+                  router.push('/settings/llm');
+                  onNavigate?.();
+                }}
+                pl="xl"
+              />
+            </>
+          )}
         </NavLink>
       </AppShell.Section>
 
       <AppShell.Section>
-        <Divider my={4} />
+        {!isCollapsed && <Divider my={4} />}
         <Stack p="xs" gap={4}>
           <NavLink
-            label={mounted && colorScheme === 'dark' ? t('common.lightMode') : t('common.darkMode')}
+            label={isCollapsed ? '' : (mounted && colorScheme === 'dark' ? t('common.lightMode') : t('common.darkMode'))}
             leftSection={mounted && colorScheme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}
             onClick={toggleColorScheme}
             style={{ 
               cursor: 'pointer',
               borderRadius: 'var(--mantine-radius-md)',
+              justifyContent: isCollapsed ? 'center' : 'flex-start'
             }}
+            className={isCollapsed ? 'collapsed-navlink' : ''}
           />
-          <Select
-            leftSection={<IconLanguage size={16} />}
-            value={language}
-            onChange={handleLanguageChange}
-            data={[
-              { value: 'en', label: 'English' },
-              { value: 'zh', label: '中文' },
-            ]}
-            style={{ width: '100%' }}
-          />
-          <Divider my={4} />
-          <Group gap="xs" p="xs" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
-            <IconTestPipe size={18} style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <Text size="sm" fw={500} truncate>
-                Demo Mode
-              </Text>
-              <Text size="xs" c="dimmed" truncate>
-                Use demo data for execution
-              </Text>
-            </div>
-            <Switch
-              checked={useDemo}
-              onChange={(event) => setUseDemo(event.currentTarget.checked)}
-              size="sm"
-            />
-          </Group>
-          <Divider my={4} />
-          <NavLink
-            label="WebApp"
-            leftSection={<IconBrandGithub size={18} />}
-            href="https://github.com/aipartnerup/aipartnerupflow-webapp"
-            target="_blank"
-            rel="noopener noreferrer"
-            component="a"
-            style={{ 
-              cursor: 'pointer',
-              borderRadius: 'var(--mantine-radius-md)',
-              marginTop: 0,
-            }}
-          />
-          <NavLink
-            label="API Server"
-            leftSection={<IconBrandGithub size={18} />}
-            href="https://github.com/aipartnerup/aipartnerupflow-demo"
-            target="_blank"
-            rel="noopener noreferrer"
-            component="a"
-            style={{ 
-              cursor: 'pointer',
-              borderRadius: 'var(--mantine-radius-md)',
-              marginTop: 0,
-            }}
-          />
+          {!isCollapsed && (
+            <>
+              <Select
+                leftSection={<IconLanguage size={16} />}
+                value={language}
+                onChange={handleLanguageChange}
+                data={[
+                  { value: 'en', label: 'English' },
+                  { value: 'zh', label: '中文' },
+                ]}
+                style={{ width: '100%' }}
+              />
+              <Divider my={4} />
+              <Group gap="xs" p="xs" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+                <IconTestPipe size={18} style={{ flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text size="sm" fw={500} truncate>
+                    Demo Mode
+                  </Text>
+                  <Text size="xs" c="dimmed" truncate>
+                    Use demo data for execution
+                  </Text>
+                </div>
+                <Switch
+                  checked={useDemo}
+                  onChange={(event) => setUseDemo(event.currentTarget.checked)}
+                  size="sm"
+                />
+              </Group>
+              <Divider my={4} />
+              <NavLink
+                label="WebApp"
+                leftSection={<IconBrandGithub size={18} />}
+                href="https://github.com/aipartnerup/aipartnerupflow-webapp"
+                target="_blank"
+                rel="noopener noreferrer"
+                component="a"
+                style={{ 
+                  cursor: 'pointer',
+                  borderRadius: 'var(--mantine-radius-md)',
+                  marginTop: 0,
+                }}
+              />
+              <NavLink
+                label="API Server"
+                leftSection={<IconBrandGithub size={18} />}
+                href="https://github.com/aipartnerup/aipartnerupflow-demo"
+                target="_blank"
+                rel="noopener noreferrer"
+                component="a"
+                style={{ 
+                  cursor: 'pointer',
+                  borderRadius: 'var(--mantine-radius-md)',
+                  marginTop: 0,
+                }}
+              />
+            </>
+          )}
+          {isCollapsed && (
+            <>
+              <NavLink
+                label=""
+                leftSection={<IconLanguage size={18} />}
+                style={{ 
+                  justifyContent: 'center'
+                }}
+                className="collapsed-navlink"
+              />
+              <NavLink
+                label=""
+                leftSection={<IconTestPipe size={18} />}
+                style={{ 
+                  justifyContent: 'center'
+                }}
+                className="collapsed-navlink"
+              />
+              <NavLink
+                label=""
+                leftSection={<IconBrandGithub size={18} />}
+                href="https://github.com/aipartnerup/aipartnerupflow-webapp"
+                target="_blank"
+                rel="noopener noreferrer"
+                component="a"
+                style={{ 
+                  cursor: 'pointer',
+                  borderRadius: 'var(--mantine-radius-md)',
+                  justifyContent: 'center'
+                }}
+                className="collapsed-navlink"
+              />
+            </>
+          )}
         </Stack>
       </AppShell.Section>
     </AppShell.Navbar>

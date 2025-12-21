@@ -189,3 +189,67 @@ body {
 [data-mantine-color-scheme="dark"] .mantine-Title-root {
   color: var(--mantine-color-dark-0);
 }
+
+/* TextInput and Select label styles for better contrast in light mode */
+[data-mantine-color-scheme="light"] .mantine-TextInput-label,
+[data-mantine-color-scheme="light"] .mantine-Select-label {
+  color: var(--mantine-color-gray-9);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-TextInput-label,
+[data-mantine-color-scheme="dark"] .mantine-Select-label {
+  color: var(--mantine-color-dark-0);
+}
+
+/* Select input text styles for better contrast in light mode */
+[data-mantine-color-scheme="light"] .mantine-Select-input {
+  color: var(--mantine-color-gray-9);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Select-input {
+  color: var(--mantine-color-dark-0);
+}
+
+/* Select dropdown option text styles for better contrast in light mode */
+[data-mantine-color-scheme="light"] .mantine-Select-option {
+  color: var(--mantine-color-gray-9);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Select-option {
+  color: var(--mantine-color-dark-0);
+}
+
+/* Navbar burger button and logo - always visible */
+.navbar-burger-button {
+  flex-shrink: 0;
+  display: block;
+}
+
+.navbar-logo {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Smooth transition for navbar width */
+.mantine-AppShell-navbar {
+  transition: width 0.2s ease;
+}
+
+/* Collapsed navlink styles - hide label, show only icon, center it */
+.collapsed-navlink .mantine-NavLink-label {
+  display: none !important;
+}
+
+.collapsed-navlink .mantine-NavLink-leftSection {
+  margin-right: 0 !important;
+}
+
+.collapsed-navlink {
+  justify-content: center !important;
+  padding: var(--mantine-spacing-xs) !important;
+}
+
+/* Hide right section (chevron) when collapsed */
+.collapsed-navlink .mantine-NavLink-rightSection {
+  display: none !important;
+}

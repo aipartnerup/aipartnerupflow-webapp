@@ -35,31 +35,21 @@ export function AppShellWrapper({ children }: AppShellWrapperProps) {
 
   return (
     <MantineAppShell
-      header={{ height: 60 }}
       navbar={{
-        width: 260,
+        width: desktopOpened ? 260 : 60,
         breakpoint: 'sm',
-        collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+        collapsed: { mobile: !mobileOpened, desktop: false },
+        withBorder: false,
       }}
       padding="md"
     >
-      <MantineAppShell.Header>
-        <Burger
-          opened={mobileOpened}
-          onClick={toggleMobile}
-          hiddenFrom="sm"
-          size="sm"
-          style={{ margin: 'var(--mantine-spacing-md)' }}
-        />
-        <Burger
-          opened={desktopOpened}
-          onClick={toggleDesktop}
-          visibleFrom="sm"
-          size="sm"
-          style={{ margin: 'var(--mantine-spacing-md)' }}
-        />
-      </MantineAppShell.Header>
-      <AppNavbar onNavigate={closeMobile} />
+      <AppNavbar 
+        onNavigate={closeMobile}
+        mobileOpened={mobileOpened}
+        desktopOpened={desktopOpened}
+        onToggleMobile={toggleMobile}
+        onToggleDesktop={toggleDesktop}
+      />
       <MantineAppShell.Main style={{ transition: 'background-color 0.2s ease' }}>
         {children}
       </MantineAppShell.Main>
