@@ -283,7 +283,7 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
                 style={{ width: '100%' }}
               />
               <Divider my={4} />
-              <Group gap="xs" p="xs" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
+              <Group gap="xs" p="xs" className="demo-mode-block">
                 <IconTestPipe size={18} style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm" fw={500} truncate>
