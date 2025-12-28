@@ -145,6 +145,15 @@ function TaskListPageContent() {
           if (event.final || event.type === 'stream_end') {
             setExecutingTaskId(null);
             if (event.status === 'completed') {
+              // 立即更新 tasks 列表缓存中对应任务的状态为 completed
+              queryClient.setQueryData(['tasks', searchQuery, statusFilter, viewMode], (oldTasks: any) => {
+                if (!oldTasks) return oldTasks;
+                // 兼容数组和对象
+                if (Array.isArray(oldTasks)) {
+                  return oldTasks.map((t) => t.id === taskId ? { ...t, status: 'completed' } : t);
+                }
+                return oldTasks;
+              });
               notifications.show({
                 title: 'Task Completed',
                 message: `Task ${taskId} completed successfully`,
