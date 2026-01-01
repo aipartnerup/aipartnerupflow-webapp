@@ -8,7 +8,7 @@
 
 import { Container, Title, Button, Group, TextInput, Table, Badge, ActionIcon, Tooltip, Text, Select, Stack, Alert, useMantineColorScheme, Card, Code, Tabs, Progress } from '@mantine/core';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, Task } from '@/lib/api/aipartnerupflow';
+import { apiClient, Task } from '@/lib/api/apflow';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconPlus, IconSearch, IconEye, IconCopy, IconTrash, IconDatabase, IconInfoCircle, IconPlayerPlay, IconChevronDown, IconChevronRight, IconArrowLeft, IconTree, IconCode, IconFileText, IconRefresh } from '@tabler/icons-react';
@@ -327,7 +327,7 @@ function TaskListPageContent() {
                 </Text>
               )}
               <Text size="sm" ff="monospace" c={colorScheme === 'dark' ? 'dark.0' : 'gray.9'}>
-                {task.id.substring(0, 8)}...
+                {`${task.id.substring(0, 4)}...${task.id.substring(task.id.length - 4)}`}
               </Text>
             </Group>
           </Table.Td>
@@ -528,7 +528,7 @@ function TaskListPageContent() {
         <Title order={1} mb="xl">{task.name}</Title>
 
         <Tabs defaultValue="overview">
-          <Tabs.List>
+          <Tabs.List style={{ color: colorScheme === 'dark' ? undefined : 'var(--mantine-color-gray-9)' }}>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
               {t('tasks.detail')}
             </Tabs.Tab>
@@ -563,12 +563,12 @@ function TaskListPageContent() {
                 )}
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" c="dimmed">{t('tasks.id')}</Text>
+                    <Text size="sm" c={colorScheme === 'dark' ? 'dimmed' : 'gray.7'}>{t('tasks.id')}</Text>
                     <Code>{task.id}</Code>
                   </div>
                   {task.parent_id && (
                     <div>
-                      <Text size="sm" c="dimmed">Parent ID</Text>
+                      <Text size="sm" c={colorScheme === 'dark' ? 'dimmed' : 'gray.7'}>Parent ID</Text>
                       <Code>{task.parent_id}</Code>
                     </div>
                   )}
@@ -576,12 +576,12 @@ function TaskListPageContent() {
                 {task.created_at && (
                   <Group justify="space-between" mt="md">
                     <div>
-                      <Text size="sm" c="dimmed">{t('tasks.createdAt')}</Text>
+                      <Text size="sm" c={colorScheme === 'dark' ? 'dimmed' : 'gray.7'}>{t('tasks.createdAt')}</Text>
                       <Text size="sm">{new Date(task.created_at).toLocaleString()}</Text>
                     </div>
                     {task.updated_at && (
                       <div>
-                        <Text size="sm" c="dimmed">{t('tasks.updatedAt')}</Text>
+                        <Text size="sm" c={colorScheme === 'dark' ? 'dimmed' : 'gray.7'}>{t('tasks.updatedAt')}</Text>
                         <Text size="sm">{new Date(task.updated_at).toLocaleString()}</Text>
                       </div>
                     )}
@@ -620,7 +620,7 @@ function TaskListPageContent() {
 
           <Tabs.Panel value="json" pt="md">
             <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Text size="sm" c="dimmed" mb="md">
+              <Text size="sm" c={colorScheme === 'dark' ? 'dimmed' : 'gray.7'} mb="md">
                 Complete task model data (all fields)
               </Text>
               <Code block style={{ maxHeight: '70vh', overflow: 'auto' }}>
@@ -772,7 +772,7 @@ function TaskListPageContent() {
       ) : (
         <Table striped highlightOnHover>
           <Table.Thead>
-            <Table.Tr>
+            <Table.Tr style={{ color: colorScheme === 'dark' ? undefined : 'var(--mantine-color-gray-9)' }}>
               <Table.Th>{t('tasks.id')}</Table.Th>
               <Table.Th>{t('tasks.name')}</Table.Th>
               <Table.Th>{t('tasks.status')}</Table.Th>

@@ -8,7 +8,7 @@
 
 import { Container, Title, Grid, Card, Text, Group, Badge, Stack, Alert, Button } from '@mantine/core';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api/aipartnerupflow';
+import { apiClient } from '@/lib/api/apflow';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { IconList, IconCheck, IconX, IconClock, IconDatabase, IconInfoCircle } from '@tabler/icons-react';

@@ -102,7 +102,7 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
           )}
           <Image
             src="/logo.svg"
-            alt="AIPartnerUpFlow Logo"
+            alt="apflow Logo"
             width={32}
             height={32}
             style={{ objectFit: 'contain', flexShrink: 0 }}
@@ -115,7 +115,7 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
               style={{ userSelect: 'none', flexShrink: 0 }}
               className="navbar-brand-text"
             >
-              AIPartnerUpFlow
+              apflow
             </Text>
           )}
         </Group>
@@ -284,12 +284,12 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
               />
               <Divider my={4} />
               <Group gap="xs" p="xs" style={{ borderRadius: 'var(--mantine-radius-md)' }}>
-                <IconTestPipe size={18} style={{ flexShrink: 0 }} />
+                <IconTestPipe size={18} style={{ flexShrink: 0, color: colorScheme === 'dark' ? undefined : 'var(--mantine-color-gray-9)' }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <Text size="sm" fw={500} truncate>
+                  <Text size="sm" fw={500} truncate c={colorScheme === 'dark' ? undefined : 'var(--mantine-color-gray-9)'}>
                     Demo Mode
                   </Text>
-                  <Text size="xs" c="dimmed" truncate>
+                  <Text size="xs" c={colorScheme === 'dark' ? 'dimmed' : 'gray.7'} truncate>
                     Use demo data for execution
                   </Text>
                 </div>
@@ -303,7 +303,7 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
               <NavLink
                 label="WebApp"
                 leftSection={<IconBrandGithub size={18} />}
-                href="https://github.com/aipartnerup/aipartnerupflow-webapp"
+                href="https://github.com/aipartnerup/apflow-webapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 component="a"
@@ -316,7 +316,7 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
               <NavLink
                 label="API Server"
                 leftSection={<IconBrandGithub size={18} />}
-                href="https://github.com/aipartnerup/aipartnerupflow-demo"
+                href="https://github.com/aipartnerup/apflow-demo"
                 target="_blank"
                 rel="noopener noreferrer"
                 component="a"
@@ -349,7 +349,7 @@ export function AppNavbar({ onNavigate, mobileOpened, desktopOpened, onToggleMob
               <NavLink
                 label=""
                 leftSection={<IconBrandGithub size={18} />}
-                href="https://github.com/aipartnerup/aipartnerupflow-webapp"
+                href="https://github.com/aipartnerup/apflow-webapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 component="a"

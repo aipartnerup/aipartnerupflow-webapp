@@ -9,7 +9,7 @@
 import { Container, Title, Button, Card, Stack, TextInput, Select, Textarea, Group, SegmentedControl, Alert } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, Task, GenerateTaskResponse } from '@/lib/api/aipartnerupflow';
+import { apiClient, Task, GenerateTaskResponse } from '@/lib/api/apflow';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { notifications } from '@mantine/notifications';

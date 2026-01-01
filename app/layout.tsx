@@ -15,8 +15,8 @@ import { themeConfig } from '@/lib/theme/config';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AIPartnerUpFlow - Task Management",
-  description: "Web application for managing and executing tasks with aipartnerupflow",
+  title: "APFlow - Task Management",
+  description: "Web application for managing and executing tasks with apflow",
   icons: {
     icon: '/favicon.ico',
   },
