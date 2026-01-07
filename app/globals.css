@@ -69,6 +69,7 @@ body {
   padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
   transition: all 0.2s ease;
   color: var(--mantine-color-gray-7);
+  width: 100%;
 }
 
 [data-mantine-color-scheme="dark"] .mantine-NavLink-root {
