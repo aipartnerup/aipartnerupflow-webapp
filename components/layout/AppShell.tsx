@@ -42,6 +42,18 @@ export function AppShellWrapper({ children }: AppShellWrapperProps) {
       }}
       padding="md"
     >
+      <MantineAppShell.Header>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px' }}>
+          {/* Mobile menu toggle in header so it's accessible when navbar is hidden */}
+          <Burger
+            opened={mobileOpened}
+            onClick={toggleMobile}
+            hiddenFrom="sm"
+            size="sm"
+            aria-label="Toggle navigation"
+          />
+        </div>
+      </MantineAppShell.Header>
       <AppNavbar 
         onNavigate={closeMobile}
         mobileOpened={mobileOpened}
