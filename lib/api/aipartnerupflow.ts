@@ -398,7 +398,13 @@ export class AIPartnerUpFlowClient {
    * Get task detail (alias for getTask)
    */
   async getTaskDetail(taskId: string): Promise<Task> {
-    return this.rpcRequest<Task>('/tasks', 'tasks.detail', { task_id: taskId });
+    const response = await this.rpcRequest<{ task: any; children: any[] }>('/tasks', 'tasks.detail', { task_id: taskId });
+    function convertNode(node: { task: any; children: any[] }): Task {
+      const t: Task = { ...node.task };
+      t.children = (node.children || []).map(convertNode);
+      return t;
+    }
+    return convertNode(response);
   }
 
   /**
@@ -408,7 +414,15 @@ export class AIPartnerUpFlowClient {
     const params: any = {};
     if (taskId) params.task_id = taskId;
     if (rootId) params.root_id = rootId;
-    return this.rpcRequest<TaskTree>('/tasks', 'tasks.tree', params);
+    const response = await this.rpcRequest<{ task: any; children: any[] }>('/tasks', 'tasks.tree', params);
+    function convertNode(node: { task: any; children: any[] }): Task {
+      const t: Task = { ...node.task };
+      t.children = node.children ? node.children.map(convertNode) : [];
+      return t;
+    }
+    const result = convertNode(response) as TaskTree;
+    // console.info('return task tree:', result);
+    return result;
   }
 
   /**
