@@ -13,7 +13,7 @@
 
 import { Container, Title, TextInput, Button, Group, Text, Alert, Stack, Select } from '@mantine/core';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api/aipartnerupflow';
+import { apiClient } from '@/lib/api/apflow';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
@@ -192,7 +192,7 @@ export default function LLMKeySettingsPage() {
         <div>
           <Title order={3} mb="md">Method 2: User Config (Multi-User)</Title>
           <Text c="dimmed" mb="md">
-            Store LLM key on server. Requires aipartnerupflow[llm-key-config] extra.
+            Store LLM key on server. Requires apflow[llm-key-config] extra.
             Suitable for multi-user scenarios. Key is stored in server memory (not database).
           </Text>
           

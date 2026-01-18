@@ -1,6 +1,6 @@
-# AIPartnerUpFlow WebApp
+# APFlow WebApp
 
-A modern web application for managing and executing tasks with aipartnerupflow, built with Next.js and Mantine.
+A modern web application for managing and executing tasks with apflow, built with Next.js and Mantine.
 
 ## Features
 
@@ -28,14 +28,14 @@ A modern web application for managing and executing tasks with aipartnerupflow, 
 
 - Node.js 18+ 
 - npm 9+
-- AIPartnerUpFlow API server running (default: http://localhost:8000)
+- APFlow API server running (default: http://localhost:8000)
 
 ### Installation
 
 1. Clone the repository and navigate to the project:
 
 ```bash
-cd aipartnerupflow-webapp
+cd apflow-webapp
 ```
 
 2. Install dependencies:
@@ -63,7 +63,7 @@ NEXT_PUBLIC_SHOW_AUTH_SETTINGS=true
 
 # Auto-login endpoint path (optional)
 # If set, enables automatic cookie-based authentication
-# Example: /auth/auto-login (for aipartnerupflow-demo)
+# Example: /auth/auto-login (for apflow-demo)
 # Leave empty or unset to disable auto-login
 NEXT_PUBLIC_AUTO_LOGIN_PATH=
 ```
@@ -93,7 +93,7 @@ npm run dev
 ## Project Structure
 
 ```
-aipartnerupflow-webapp/
+apflow-webapp/
 ├── app/                    # Next.js App Router pages
 │   ├── layout.tsx          # Root layout
 │   ├── page.tsx            # Dashboard
@@ -112,7 +112,7 @@ aipartnerupflow-webapp/
 │       └── TaskTreeView.tsx # Task tree visualization
 ├── lib/                    # Utilities and configurations
 │   ├── api/                # API client
-│   │   └── aipartnerupflow.ts
+│   │   └── apflow.ts
 │   ├── hooks/             # Custom React hooks
 │   ├── i18n/              # Internationalization
 │   │   ├── config.ts
@@ -148,10 +148,10 @@ aipartnerupflow-webapp/
 
 ## API Integration
 
-The application uses JSON-RPC 2.0 protocol to communicate with the aipartnerupflow API server. All API methods are available through the `apiClient` instance:
+The application uses JSON-RPC 2.0 protocol to communicate with the apflow API server. All API methods are available through the `apiClient` instance:
 
 ```typescript
-import { apiClient } from '@/lib/api/aipartnerupflow';
+import { apiClient } from '@/lib/api/apflow';
 
 // Create tasks
 await apiClient.createTasks([...]);
@@ -172,7 +172,7 @@ The webapp supports two authentication modes for compatibility with different se
 
 ### Standard Server Authentication (JWT Token Required)
 
-For standard `aipartnerupflow` servers:
+For standard `apflow` servers:
 - **JWT token is required**: Set the authentication token in Settings page
 - Token is stored in `localStorage` as `auth_token`
 - Token is sent in `Authorization: Bearer <token>` header with every request
@@ -180,7 +180,7 @@ For standard `aipartnerupflow` servers:
 
 ### Demo Server Authentication (Automatic Cookie-Based)
 
-For `aipartnerupflow-demo` servers:
+For `apflow-demo` servers:
 - **JWT token is optional**: Demo servers automatically generate tokens via cookies
 - If no token is set, the browser automatically sends cookies (`authorization`)
 - Demo server middleware extracts the token from cookies and adds it to the Authorization header
@@ -277,7 +277,7 @@ When set, the webapp will:
 - Hide token input field
 - Display "Auto Login Enabled" message
 - Automatically use cookie-based authentication
-- Work seamlessly with `aipartnerupflow-demo` servers (which provide `/auth/auto-login` endpoint)
+- Work seamlessly with `apflow-demo` servers (which provide `/auth/auto-login` endpoint)
 
 **Example values:**
 - `/auth/auto-login` - Standard demo server endpoint
@@ -286,9 +286,9 @@ When set, the webapp will:
 
 ### Deployment Scenarios
 
-#### Standard aipartnerupflow (Developer Mode)
+#### Standard apflow (Developer Mode)
 
-For standard `aipartnerupflow` deployments where developers need to configure tokens:
+For standard `apflow` deployments where developers need to configure tokens:
 
 **Configuration** (create `.env` file):
 
@@ -308,9 +308,9 @@ npm run build.env  # Production build with .env file
 - Shows authentication token input field
 - Developers can manually configure JWT tokens
 
-#### aipartnerupflow-demo (Auto Login)
+#### apflow-demo (Auto Login)
 
-For `aipartnerupflow-demo` deployments with automatic authentication:
+For `apflow-demo` deployments with automatic authentication:
 
 **Configuration** (create `.env` file):
 
@@ -401,7 +401,7 @@ To add a new language:
 
 ### Extending API Client
 
-Edit `lib/api/aipartnerupflow.ts` to add new API methods.
+Edit `lib/api/apflow.ts` to add new API methods.
 
 ### Customizing Theme
 

@@ -7,9 +7,10 @@
  */
 
 import { Container, Title, Button, Card, Stack, TextInput, Select, Textarea, Group, SegmentedControl, Alert } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, Task, GenerateTaskResponse } from '@/lib/api/aipartnerupflow';
+import { apiClient, Task, GenerateTaskResponse } from '@/lib/api/apflow';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { notifications } from '@mantine/notifications';
@@ -45,6 +46,7 @@ export default function CreateTaskPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery('(max-width: 48em)');
   const [mode, setMode] = useState<'simple' | 'advanced' | 'generate'>('simple');
   const [generateStep, setGenerateStep] = useState<'input' | 'review'>('input');
 
@@ -431,6 +433,18 @@ export default function CreateTaskPage() {
                     setGenerateStep('input');
                   }
                 }}
+                fullWidth
+                orientation={isMobile ? 'vertical' : 'horizontal'}
+                styles={(theme) => ({
+                  root: {
+                    gap: isMobile ? theme.spacing.xs : theme.spacing.sm,
+                    flexWrap: isMobile ? 'nowrap' : 'wrap',
+                  },
+                  control: isMobile
+                    ? { width: '100%' }
+                    : { minWidth: 160, flex: '0 0 auto' },
+                  label: { whiteSpace: 'normal', textAlign: 'left', lineHeight: 1.2 },
+                })}
                 data={[
                   {
                     value: 'simple',

@@ -1,7 +1,7 @@
 /**
  * AIPartnerUpFlow API Client
  * 
- * This client handles all communication with the aipartnerupflow API server
+ * This client handles all communication with the apflow API server
  * using JSON-RPC 2.0 protocol with SSE streaming for task execution.
  */
 

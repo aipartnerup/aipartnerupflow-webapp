@@ -7,7 +7,7 @@
  */
 
 import { Card, Text, Badge, Group, Stack } from '@mantine/core';
-import { Task } from '@/lib/api/aipartnerupflow';
+import { Task } from '@/lib/api/apflow';
 import { useTranslation } from 'react-i18next';
 import { IconChevronRight } from '@tabler/icons-react';
 
@@ -51,8 +51,8 @@ export function TaskTreeView({ task, level = 0 }: TaskTreeViewProps) {
             {level > 0 && <IconChevronRight size={16} />}
             <div>
               <Text fw={500}>{task.name}</Text>
-              <Text size="xs" c="dimmed" ff="monospace">
-                {task.id.substring(0, 8)}...
+              <Text size="xs" c="dimmed" ff="monospace" style={{ minWidth: '100px' }}>
+                {`${task.id.substring(0, 4)}...${task.id.substring(task.id.length - 4)}`}
               </Text>
             </div>
           </Group>
